@@ -1,0 +1,37 @@
+scope: "Requested DB connection, administrator login, and protected panel"
+units:
+  - name: public-entry
+    source_anchors:
+      - "ddp/index.php:1"
+      - "ddp/boletines.php:1"
+      - "ddp/reportajes-1.php:1"
+    exported_signature: "GET public PHP pages; admin links currently target #admin"
+    dynamic_entrypoints: []
+    depends_on:
+      - "shared-database-connection"
+      - "administrator-login"
+    shared_refs:
+      - module: "ddp/clases/conexion.php"
+        used_fields: []
+  - name: administrator-login
+    source_anchors:
+      - "ddp/admin/vista/login.php:1"
+    exported_signature: "GET renders login; POST accepts email/password and redirects authenticated administrators"
+    dynamic_entrypoints: []
+    depends_on:
+      - "shared-database-connection"
+      - "administrator-panel"
+    shared_refs:
+      - module: "ddp/clases/conexion.php"
+        used_fields: []
+  - name: administrator-panel
+    source_anchors:
+      - "ddp/admin/index.php:1"
+    exported_signature: "GET protected dashboard for an authenticated administrator"
+    dynamic_entrypoints: []
+    depends_on:
+      - "administrator-login"
+      - "shared-database-connection"
+    shared_refs:
+      - module: "ddp/clases/conexion.php"
+        used_fields: []

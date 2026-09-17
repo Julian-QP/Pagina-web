@@ -1,0 +1,5 @@
+bindings:
+  - source_loc: "ddp/index.php:150"
+    framework: "PHP HTML navigation"
+    must_appear_in_target: "admin link points to canonical login route"
+runtime_config: []

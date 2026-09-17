@@ -1,0 +1,15 @@
+modules:
+  - source_loc: "ddp/clases/conexion.php:2"
+    kind: "database-access-wrapper"
+    used_by_units: ["public-entry", "administrator-login", "administrator-panel"]
+    fields:
+      - name: host
+        type: string
+      - name: username
+        type: string
+      - name: clave
+        type: string
+      - name: bd
+        type: string
+    split_candidate: "Introduce a prepared-statement method while preserving existing callers; do not duplicate connection configuration."
+    migration_strategy: "centralize configuration and expose parameterized reads/writes"

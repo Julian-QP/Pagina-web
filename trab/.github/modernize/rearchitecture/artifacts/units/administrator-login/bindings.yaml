@@ -1,0 +1,11 @@
+bindings:
+  - source_loc: "ddp/admin/vista/login.php:1"
+    framework: "PHP HTTP"
+    must_appear_in_target: "GET/POST route, form fields email/password, redirect to admin panel"
+runtime_config:
+  - key: "database credentials"
+    source: "ddp/clases/conexion.php:4-7"
+    must_appear_in_target: true
+  - key: "PHP session"
+    source: "runtime"
+    must_appear_in_target: true

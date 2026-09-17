@@ -1,0 +1,13 @@
+contracts:
+  - source_loc: "ddp/admin/vista/login.php:1"
+    unit: "administrator-login"
+    protocol: "http"
+    stability: "new"
+    target_contract: "GET renders email/password form; POST validates credentials, starts a session, and redirects administrators to ../index.php; invalid credentials redisplay a generic error."
+    semantic_divergence: "Use password_verify against usuarios.password_hash; never compare plaintext passwords."
+  - source_loc: "ddp/admin/index.php:1"
+    unit: "administrator-panel"
+    protocol: "http"
+    stability: "frozen"
+    target_contract: "Every request requires a valid session user with rol=administrador; unauthenticated requests redirect to vista/login.php."
+    semantic_divergence: "Authorization is server-side and must not rely on hiding menu links."

@@ -1,0 +1,17 @@
+user_intent:
+  acceptance_criteria:
+    - "Connect PHP application to the prueba database."
+    - "Allow an administrator to log in before accessing the panel."
+  cleanup_required: false
+strategy: "partial_boundary"
+must_rewrite:
+  - "ddp/admin/vista/login.php"
+  - "ddp/admin/index.php"
+  - "ddp/clases/conexion.php"
+  - "public admin navigation links in ddp/index.php, ddp/boletines.php, and ddp/reportajes-1.php"
+copy_as_is:
+  - "ddp/prueba.sql schema, including usuarios.password_hash and usuarios.rol"
+legacy_allowed_to_remain:
+  - "admin template pages not reachable until they receive the same authorization guard"
+defer_cleanup:
+  - "Replacing all raw SQL calls outside the login path"

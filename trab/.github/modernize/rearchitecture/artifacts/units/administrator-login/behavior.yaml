@@ -1,0 +1,19 @@
+side_effects:
+  - action: "Creates authenticated PHP session after valid administrator credentials"
+    must_preserve: true
+branches:
+  - condition: "GET request"
+    outcome: "Render login form"
+    must_preserve: true
+  - condition: "POST with invalid email/password"
+    outcome: "Show generic authentication error without revealing which field failed"
+    must_preserve: true
+  - condition: "POST for non-administrator role"
+    outcome: "Deny panel access"
+    must_preserve: true
+error_paths:
+  - contract: "Database failure must surface as an application error, not a successful login"
+    must_preserve: true
+concurrency:
+  model: "request-scoped PHP execution"
+  tx_boundary: "single credential lookup"

@@ -1,0 +1,5 @@
+commit: false
+candidate_splits:
+  - name: "login-render-and-submit"
+    drivers: ["protocol-boundary"]
+    rationale: "GET rendering and POST authentication have distinct branches but can remain one small entry point."

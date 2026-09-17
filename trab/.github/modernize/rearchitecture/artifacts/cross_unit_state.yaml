@@ -1,0 +1,12 @@
+flows:
+  - source: "administrator-login -> administrator-panel"
+    state: "PHP session containing authenticated user id, email, and rol"
+    pairing: "matched"
+    must_preserve: true
+    verification_hint: "After successful POST, session_regenerate_id(true); panel reads session and rejects missing or non-administrator rol."
+  - source: "public-entry -> administrator-login"
+    state: "navigation link"
+    pairing: "unpaired"
+    must_preserve: true
+    must_confirm: "runtime"
+    verification_hint: "Replace each #admin link intended for administration with the canonical login URL."

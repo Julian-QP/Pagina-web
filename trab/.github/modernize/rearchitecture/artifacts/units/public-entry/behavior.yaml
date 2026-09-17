@@ -1,0 +1,12 @@
+side_effects: []
+branches:
+  - condition: "Public page request"
+    outcome: "Render public content"
+    must_preserve: true
+  - condition: "User selects admin navigation"
+    outcome: "Navigate to login entry point"
+    must_preserve: true
+error_paths: []
+concurrency:
+  model: "request-scoped PHP execution"
+  tx_boundary: null

@@ -1,0 +1,100 @@
+@media (max-width: 991.98px) {
+  body.vertical-layout.vertical-menu.menu-expanded .navbar .navbar-container,
+  body.vertical-layout.vertical-menu.menu-expanded .content,
+  body.vertical-layout.vertical-menu.menu-expanded .footer {
+    margin-left: 0;
+  }
+
+  body.vertical-layout.vertical-menu .main-menu {
+    left: 0;
+    right: auto;
+    transform: translateX(-100%) !important;
+    transition: transform .25s ease;
+    width: 260px;
+    z-index: 1050;
+  }
+
+  body.vertical-layout.vertical-menu.admin-menu-open .main-menu {
+    transform: translateX(0) !important;
+  }
+
+  body.vertical-layout.vertical-menu.admin-menu-open::after {
+    background: rgba(37, 56, 88, .38);
+    content: "";
+    inset: 0;
+    position: fixed;
+    z-index: 1040;
+  }
+
+  .admin-menu-toggle {
+    align-items: center;
+    background: #c62828;
+    border: 0;
+    border-radius: 6px;
+    color: #fff;
+    display: inline-flex;
+    font-size: 1.25rem;
+    height: 38px;
+    justify-content: center;
+    left: 8px;
+    margin: 0;
+    position: fixed;
+    top: 11px;
+    width: 42px;
+    z-index: 1060;
+  }
+
+  .header-navbar,
+  .header-navbar .navbar-wrapper,
+  .header-navbar .navbar-container {
+    min-height: 60px;
+  }
+
+  .header-navbar .navbar-container {
+    margin-left: 0 !important;
+  }
+
+  .admin-menu-close {
+    color: #c62828 !important;
+    display: inline-block !important;
+  }
+
+  .app-content.content {
+    min-width: 0;
+    overflow-x: hidden;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .content-wrapper,
+  .content-body {
+    min-width: 0;
+  }
+
+  .table-responsive,
+  .usuarios-table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .header-navbar .navbar-container {
+    padding: 0 .5rem !important;
+  }
+
+  .header-navbar .dropdown-user-link {
+    padding-left: .4rem !important;
+    padding-right: .4rem !important;
+  }
+
+  .dashboard-card .card-header,
+  .dashboard-card .card-body {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .dashboard-gallery {
+    display: none;
+  }
+}

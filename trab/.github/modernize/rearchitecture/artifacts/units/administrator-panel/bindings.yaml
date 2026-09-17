@@ -1,0 +1,8 @@
+bindings:
+  - source_loc: "ddp/admin/index.php:1"
+    framework: "PHP HTTP"
+    must_appear_in_target: "authorization guard before dashboard output"
+runtime_config:
+  - key: "login redirect path"
+    source: "ddp/admin/vista/login.php"
+    must_appear_in_target: true

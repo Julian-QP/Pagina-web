@@ -1,0 +1,5 @@
+commit: false
+candidate_splits:
+  - name: "authorization-guard"
+    drivers: ["security-boundary"]
+    rationale: "The guard may be extracted for reuse by every admin page."

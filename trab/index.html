@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarjeta con recorte perfecto</title>
+</head>
+<style>
+    
+/* 1. Contenedor principal: Fondo dividido en dos (rojo arriba, azul abajo) */
+.tarjeta-contenedor {
+    position: relative;
+    width: 700px;
+    height: 450px;
+    border-radius: 24px;
+    overflow: hidden;
+    /* Mitad superior roja (50%), mitad inferior azul (50%) */
+    background: linear-gradient(to bottom, #DC030C 50%, #ffffff 50%);
+}
+
+/* 2. Caja con la IMAGEN aplicando el path exacto */
+.caja-imagen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* Reemplaza 'tu-imagen.jpg' por la ruta de tu imagen */
+    background-image: url('https://static.wikia.nocookie.net/leagueoflegends/images/b/b5/09IO052T1-full.png/revision/latest?cb=20240422203749');
+    background-size: cover;
+    background-position: center;
+    
+    /* 
+      EXPLICACIÓN DEL PATH:
+      - M 0,24 ... L 500,0: Borde superior y la curva roja que se extiende hondo hacia la izquierda (ancho mayor).
+      - C 600,50 ... 670,225: Llega al centro exacto (Y = 225) conectando ambas partes.
+      - C 670,300 ... 600,450: La curva azul baja de forma más cerrada (mitad de ancho visual).
+    */
+   clip-path: path('M 0,20 C 0,9 9,0 25,0 L 460,0 C 890,8 600,620 645,190 C 808,190 600,470 560,450 L 20,450 C 9,450 0,441 0,430 Z');
+    
+    overflow: hidden;
+}
+
+</style>
+<body>
+
+    <!-- Contenedor principal con los fondos rojo y azul en la derecha -->
+    <div class="tarjeta-contenedor">
+        
+        <!-- Caja principal con la IMAGEN y el recorte exacto -->
+        <div class="caja-imagen">
+        </div>
+
+    </div>
+
+</body>
+</html>

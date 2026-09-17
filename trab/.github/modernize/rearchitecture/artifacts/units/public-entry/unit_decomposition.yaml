@@ -1,0 +1,5 @@
+commit: false
+candidate_splits:
+  - name: "public-pages"
+    drivers: ["protocol-boundary"]
+    rationale: "The three public PHP pages share the same navigation concern but remain separate entry points."

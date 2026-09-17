@@ -1,0 +1,17 @@
+side_effects: []
+branches:
+  - condition: "No authenticated session"
+    outcome: "Redirect to login"
+    must_preserve: true
+  - condition: "Authenticated session rol is administrador"
+    outcome: "Render dashboard"
+    must_preserve: true
+  - condition: "Authenticated session has another role"
+    outcome: "Deny access"
+    must_preserve: true
+error_paths:
+  - contract: "Missing or invalid session must never render protected content"
+    must_preserve: true
+concurrency:
+  model: "request-scoped PHP execution"
+  tx_boundary: null
