@@ -2,7 +2,7 @@ name: Deploy PHP to InfinityFree
 
 on:
   push:
-    branches: [ principal, main ]
+    branches: [ stope]
 
 jobs:
   web-deploy:
@@ -19,4 +19,5 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         server-dir: /htdocs/
+
     
