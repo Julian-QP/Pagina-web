@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/ddp/admin/conexion.php';
+require_once __DIR__ . '/admin/conexion.php';
 
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 $conexion = new conexion();
