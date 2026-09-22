@@ -196,7 +196,7 @@ $decoracionAzulPorcentaje = round($decoracionPortada['azul'] / 7, 2);
                 <?php
                 $fotos = $reportaje['fotos'] ? explode('||', $reportaje['fotos']) : [];
                 $imagen = imagenReportajePublico($reportaje['foto_principal'] ?: ($fotos[0] ?? ''));
-                $enlace = '../conte_reportaje.php?id=' . (int) $reportaje['id'];
+                $enlace = '/conte_reportaje.php?id=' . (int) $reportaje['id'];
                 ?>
                 <div class="col-lg-4 col-md-6 grids5-info mt-5 reportajes-secundarios">
                     <a href="<?= $enlace ?>" class="d-block reportaje-public-cover" style="--decoracion-rojo: <?= escaparReportajePublico($decoracionPortada['color_rojo']) ?>; --decoracion-azul: <?= escaparReportajePublico($decoracionPortada['color_azul']) ?>;"><svg viewBox="0 0 700 450" preserveAspectRatio="none" role="img" aria-label="<?= escaparReportajePublico($reportaje['titulo']) ?>"><defs><clipPath id="decoracion-portada-<?= (int) $reportaje['id'] ?>"><path d="<?= escaparReportajePublico($rutaDecoracionSvg) ?>"></path></clipPath></defs><image href="<?= escaparReportajePublico($imagen) ?>" x="0" y="0" width="700" height="450" preserveAspectRatio="xMidYMid slice" clip-path="url(#decoracion-portada-<?= (int) $reportaje['id'] ?>)"></image></svg></a>

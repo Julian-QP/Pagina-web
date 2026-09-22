@@ -28,7 +28,7 @@ function contenidoDetalle(?string $valor): string
     $limpio = preg_replace_callback('/<img\b[^>]*>/i', static function (array $coincidencia): string {
         preg_match('/\bsrc=["\'](config\/image\/[^"\']+)["\']/i', $coincidencia[0], $src);
         preg_match('/\balt=["\']([^"\']*)["\']/i', $coincidencia[0], $alt);
-        return isset($src[1]) ? '<img src="ddp/admin/' . htmlspecialchars($src[1], ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars($alt[1] ?? '', ENT_QUOTES, 'UTF-8') . '">' : '';
+        return isset($src[1]) ? '<img src="admin/' . htmlspecialchars($src[1], ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars($alt[1] ?? '', ENT_QUOTES, 'UTF-8') . '">' : '';
     }, $limpio) ?? '';
     $limpio = preg_replace('/<(strong|b|em|i|u|ul|ol|li|br)\s[^>]*>/i', '<$1>', $limpio) ?? '';
     $limpio = preg_replace_callback('/<p\b([^>]*)>/i', static function (array $coincidencia): string {
@@ -67,15 +67,15 @@ function imagenDetalle(?string $ruta): string
 {
     $ruta = trim((string) $ruta);
     if ($ruta === '') {
-        return 'ddp/assets/images/reportaje-18-08-26.jpg';
+        return 'assets/images/reportaje-18-08-26.jpg';
     }
     if (str_starts_with($ruta, 'config/')) {
-        return 'ddp/admin/' . $ruta;
+        return 'admin/' . $ruta;
     }
     if (str_starts_with($ruta, 'image/')) {
-        return 'ddp/admin/config/' . $ruta;
+        return 'admin/config/' . $ruta;
     }
-    return 'ddp/' . ltrim($ruta, '/');
+    return ltrim($ruta, '/');
 }
 
 function decoracionDetalle(?string $valor): array
@@ -129,7 +129,7 @@ $ultimos = array_values(array_filter(
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>DyD Perú | <?= escaparDetalle($reportaje['titulo']) ?></title>
     <link href="https://fonts.googleapis.com/css?family=Cabin:400,500,600&amp;subset=latin-ext,vietnamese" rel="stylesheet">
-    <link rel="stylesheet" href="ddp/assets/css/style-starter.css">
+    <link rel="stylesheet" href="assets/css/style-starter.css">
     <style>
         .reportaje-content-image {
             display: block;
@@ -218,20 +218,20 @@ $ultimos = array_values(array_filter(
 <header id="site-header" class="fixed-top">
     <div class="container">
         <nav class="navbar navbar-expand-lg stroke">
-            <a class="navbar-brand" href="ddp/index.php"><img src="ddp/assets/images/logo.png" alt="Diálogo y Desarrollo Perú" style="height:75px;"></a>
+            <a class="navbar-brand" href="index.php"><img src="assets/images/logo.png" alt="Diálogo y Desarrollo Perú" style="height:75px;"></a>
             <button class="navbar-toggler collapsed bg-gradient" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Abrir menú">
                 <span class="navbar-toggler-icon fa icon-expand fa-bars"></span>
                 <span class="navbar-toggler-icon fa icon-close fa-times"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
                 <ul class="navbar-nav ml-auto">
-                    <li class="nav-item"><a class="nav-link" href="ddp/index.php">Inicio</a></li>
-                    <li class="nav-item"><a class="nav-link" href="ddp/index.php#actualidad">Actualidad</a></li>
-                    <li class="nav-item active"><a class="nav-link" href="ddp/reportajes-1.php">Reportajes</a></li>
-                    <li class="nav-item"><a class="nav-link" href="ddp/about.html">Podcast</a></li>
-                    <li class="nav-item"><a class="nav-link" href="ddp/boletines.php">Boletín NTEP</a></li>
-                    <li class="nav-item"><a class="nav-link" href="ddp/about.html">Alianzas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="ddp/contact.html">Sobre D&D</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php#actualidad">Actualidad</a></li>
+                    <li class="nav-item active"><a class="nav-link" href="reportajes-1.php">Reportajes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="about.html">Podcast</a></li>
+                    <li class="nav-item"><a class="nav-link" href="boletines.php">Boletín NTEP</a></li>
+                    <li class="nav-item"><a class="nav-link" href="about.html">Alianzas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="contact.html">Sobre D&D</a></li>
                     <li class="ml-2"><a href="#footer" class="btn btn-style btn-outline-secondary">Contacto</a></li>
                 </ul>
             </div>
@@ -242,7 +242,7 @@ $ultimos = array_values(array_filter(
 <section class="breadcrumb-area py-sm-5 py-4">
     <div class="container"><div class="row"><div class="col-md-12"><div class="breadcrumb-contents">
         <h2 class="title-big">Reportajes</h2>
-        <div class="breadcrumb"><ul><li><a href="ddp/index.php">Inicio</a></li><li class="active"><a href="ddp/reportajes-1.php">Reportajes</a></li></ul></div>
+        <div class="breadcrumb"><ul><li><a href="index.php">Inicio</a></li><li class="active"><a href="reportajes-1.php">Reportajes</a></li></ul></div>
     </div></div></div></div>
 </section>
 
@@ -278,7 +278,7 @@ $ultimos = array_values(array_filter(
                         <?php endforeach; ?>
                     </div>
                     <nav class="navigation posts-navigation" aria-label="Navegación de reportajes">
-                        <div class="nav-links"><div class="nav-previous"><span class="nav-title"><span class="fa fa-arrow-left mr-2"></span><a href="ddp/reportajes-1.php">Reportajes</a></span></div></div>
+                        <div class="nav-links"><div class="nav-previous"><span class="nav-title"><span class="fa fa-arrow-left mr-2"></span><a href="reportajes-1.php">Reportajes</a></span></div></div>
                     </nav>
                 </div>
             </div>
@@ -287,13 +287,13 @@ $ultimos = array_values(array_filter(
                     <h6 class="heading-small-text-9 mb-3">Últimas noticias</h6>
                     <?php foreach (array_slice($ultimos, 0, 3) as $ultimo): ?><a href="conte_reportaje.php?id=<?= (int) $ultimo['id'] ?>" class="p-post d-block py-2"><h6 class="text-left-inner-9"><?= escaparDetalle($ultimo['titulo']) ?></h6><span class="sub-inner-text-9"><?= escaparDetalle(fechaDetalle($ultimo['fecha_publicacion'])) ?></span></a><?php endforeach; ?>
                 </div>
-                <div class="categories mt-5 pt-sm-3"><h6 class="heading-small-text-9">Archivos</h6><ul><li><a href="ddp/reportajes-1.php">Todos los reportajes</a></li></ul></div>
+                <div class="categories mt-5 pt-sm-3"><h6 class="heading-small-text-9">Archivos</h6><ul><li><a href="reportajes-1.php">Todos los reportajes</a></li></ul></div>
             </div>
         </div></div>
     </div>
 </section>
 <section class="w3l-footer-29-main py-5" id="footer"><div class="footer-29 py-md-3"><div class="container"><div class="bottom-copies text-center"><p class="copy-footer-29">© 2026 Diálogo y Desarrollo Perú.</p></div></div></div></section>
-<script src="ddp/assets/js/jquery-3.3.1.min.js"></script>
-<script src="ddp/assets/js/bootstrap.min.js"></script>
+<script src="assets/js/jquery-3.3.1.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
 </body>
 </html>
