@@ -2,7 +2,7 @@ name: Deploy PHP to InfinityFree
 
 on:
   push:
-    branches: [ principal, main ]
+    branches: [ stope]
 
 jobs:
   web-deploy:
