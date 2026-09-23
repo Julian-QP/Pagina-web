@@ -204,7 +204,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $decoracion = decoracionReportaje((string) ($_POST['decoracion_imagen'] ?? ''));
     $formulario['decoracion_imagen'] = json_encode($decoracion, JSON_THROW_ON_ERROR);
 
-    if ($formulario['titulo'] === '' || $formulario['desarrollo'] === '' ||
+    $contenidoValido = false;
+    $contenidoGuardadoPost = json_decode((string) $formulario['desarrollo'], true);
+    if (is_array($contenidoGuardadoPost)) {
+        foreach ($contenidoGuardadoPost as $parrafoGuardado) {
+            if (is_array($parrafoGuardado) && trim(strip_tags((string) ($parrafoGuardado['contenido'] ?? ''))) !== '') {
+                $contenidoValido = true;
+                break;
+            }
+        }
+    } else {
+        $contenidoValido = trim(strip_tags((string) $formulario['desarrollo'])) !== '';
+    }
+
+    if ($formulario['titulo'] === '' || !$contenidoValido ||
         mb_strlen($formulario['titulo']) > 100 || $error !== '' ||
         !in_array($formulario['estado'], ['borrador', 'publicado'], true) ||
         $formulario['fecha_publicacion'] === '') {
@@ -324,7 +337,7 @@ $guardado = isset($_GET['guardado']);
     <div class="editor-heading"><div><span class="editor-eyebrow">CONTENIDO EDITORIAL</span><h1><?= $id ? 'Editar reportaje' : 'Nuevo reportaje' ?></h1><p>Completa la información y administra los archivos del reportaje.</p></div><a class="editor-back" href="../Reportaje.php">Volver a reportajes</a></div>
     <?php if ($guardado): ?><div class="editor-alert success">El reportaje se guardó correctamente.</div><?php endif; ?>
     <?php if ($error !== ''): ?><div class="editor-alert error"><?= escaparReportaje($error) ?></div><?php endif; ?>
-    <form class="editor-form" method="post" enctype="multipart/form-data">
+    <form class="editor-form" method="post" enctype="multipart/form-data" novalidate>
       <?php if ($id): ?><input type="hidden" name="id" value="<?= (int) $id ?>"><?php endif; ?>
       <section class="editor-section"><h2>Información principal</h2><div class="editor-grid">
         <label class="wide">Título principal *<input type="text" name="titulo" maxlength="100" value="<?= escaparReportaje($formulario['titulo']) ?>" required><small>Máximo 100 caracteres.</small></label>
@@ -333,7 +346,7 @@ $guardado = isset($_GET['guardado']);
         <label class="wide">Resumen corto<input type="text" name="resumen_corto" maxlength="500" value="<?= escaparReportaje($formulario['resumen_corto']) ?>"></label>
         <div class="wide paragraph-editor">
           <div class="paragraph-editor-heading"><strong>Contenido del reportaje *</strong><span><button type="button" class="editor-button editor-button-secondary" id="modo-documento">Editar documento completo</button><button type="button" class="editor-add editor-button" id="agregar-parrafo">+ Agregar párrafo</button></span></div>
-          <div id="documento-completo-wrap" hidden><textarea id="documento-completo" rows="18"></textarea><small>Pega aquí todo el contenido desde Word. Las imágenes se subirán automáticamente al servidor y los bloques se convertirán en párrafos al guardar.</small></div>
+            <div id="documento-completo-wrap" hidden><textarea id="documento-completo" rows="18"></textarea><small>Pega aquí todo el contenido desde Word. Las imágenes se subirán automáticamente al servidor y los bloques se convertirán en párrafos al guardar.</small></div>
           <div id="parrafos-editor"><?php foreach ($parrafos as $indice => $parrafo): ?><div class="paragraph-row"><span class="paragraph-number">Párrafo <?= $indice + 1 ?></span><input type="text" name="parrafos[<?= $indice ?>][titulo]" maxlength="100" placeholder="Título opcional en negrita (máximo 100 caracteres)" value="<?= escaparReportaje($parrafo['titulo']) ?>"><textarea class="tinymce-editor" name="parrafos[<?= $indice ?>][contenido]" rows="8" required><?= escaparReportaje($parrafo['contenido']) ?></textarea><?php if ($indice > 0): ?><button type="button" class="editor-remove editor-button editor-button-danger remove-paragraph">Eliminar párrafo</button><?php endif; ?></div><?php endforeach; ?></div><small>Edita cada párrafo por separado o cambia al modo documento completo.</small>
         </div>
         <label class="check"><input type="checkbox" name="es_destacado" <?= $formulario['es_destacado'] ? 'checked' : '' ?>> Marcar como destacado</label>
@@ -370,6 +383,8 @@ $guardado = isset($_GET['guardado']);
     const parrafosEditor = document.getElementById('parrafos-editor');
     const configurarTinyMce = (selector) => tinymce.init({
       selector,
+      base_url: '/theme-assets/vendors/js/editors/tinymce',
+      suffix: '.min',
       menubar: 'file edit view format',
       plugins: 'lists link table image paste',
       toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright | bullist numlist | link image table',
@@ -398,6 +413,11 @@ $guardado = isset($_GET['guardado']);
     const modoDocumento = document.getElementById('modo-documento');
     const documentoWrap = document.getElementById('documento-completo-wrap');
     let documentoActivo = false;
+    const actualizarEstadoCamposContenido = () => {
+      parrafosEditor.querySelectorAll('input, textarea').forEach((campo) => {
+        campo.disabled = documentoActivo;
+      });
+    };
     const obtenerContenidoParrafos = () => {
       tinymce.triggerSave();
       return Array.from(parrafosEditor.querySelectorAll('.tinymce-editor'))
@@ -431,8 +451,10 @@ $guardado = isset($_GET['guardado']);
       documentoWrap.hidden = !documentoActivo;
       document.getElementById('parrafos-editor').hidden = documentoActivo;
       document.getElementById('agregar-parrafo').hidden = documentoActivo;
+      actualizarEstadoCamposContenido();
       modoDocumento.textContent = documentoActivo ? 'Editar por párrafos' : 'Editar documento completo';
     });
+    actualizarEstadoCamposContenido();
     formularioEditor.addEventListener('submit', () => {
       tinymce.triggerSave();
       if (!documentoActivo) return;

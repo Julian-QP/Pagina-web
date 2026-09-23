@@ -20,6 +20,20 @@ function escaparUsuario(?string $valor): string
 {
     return htmlspecialchars($valor ?? '', ENT_QUOTES, 'UTF-8');
 }
+
+function fechaUsuario(?string $valor): string
+{
+    if (!$valor) {
+        return '';
+    }
+    $fecha = DateTime::createFromFormat('Y-m-d H:i:s', $valor)
+        ?: DateTime::createFromFormat('Y-m-d', $valor);
+    if (!$fecha) {
+        return $valor;
+    }
+    $meses = [1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic'];
+    return $meses[(int) $fecha->format('n')] . ' ' . $fecha->format('j, Y');
+}
 ?>
 <!DOCTYPE html>
 <html class="loading" lang="en" data-textdirection="ltr">
@@ -143,7 +157,7 @@ function escaparUsuario(?string $valor): string
                     <td><strong><?= escaparUsuario(trim($usuario['nombres'] . ' ' . $usuario['ap_paterno'])) ?></strong><small><?= escaparUsuario($usuario['ap_materno']) ?></small></td>
                     <td><?= escaparUsuario($usuario['email']) ?></td>
                     <td><span class="usuario-rol <?= escaparUsuario($usuario['rol']) ?>"><?= ucfirst(escaparUsuario($usuario['rol'])) ?></span></td>
-                    <td><?= date('d/m/Y', strtotime($usuario['created_at'])) ?></td>
+                    <td><?= escaparUsuario(fechaUsuario($usuario['created_at'])) ?></td>
                     <td><a class="usuario-edit" href="config/usuario.php?id=<?= (int) $usuario['id'] ?>">Editar</a></td>
                   </tr>
                 <?php endforeach; ?>

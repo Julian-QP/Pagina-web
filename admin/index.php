@@ -32,6 +32,19 @@ function escaparDashboard(?string $valor): string
     return htmlspecialchars($valor ?? '', ENT_QUOTES, 'UTF-8');
 }
 
+function fechaDashboard(?string $valor): string
+{
+    if (!$valor) {
+        return '';
+    }
+    $fecha = DateTime::createFromFormat('Y-m-d', $valor);
+    if (!$fecha) {
+        return $valor;
+    }
+    $meses = [1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic'];
+    return $meses[(int) $fecha->format('n')] . ' ' . $fecha->format('j, Y');
+}
+
 $nombreUsuario = trim(
     (string) ($usuarioActual['nombres'] ?? '') . ' ' .
     (string) ($usuarioActual['ap_paterno'] ?? '')
@@ -423,7 +436,7 @@ foreach ($tarjetasDashboard as $tarjeta):
           <?php if ($ultimo): ?>
             <h5 class="dashboard-item-title"><?= escaparDashboard($tarjeta['clave'] === 'boletines' ? 'Boletín ' . $ultimo[$tarjeta['campo']] : $ultimo[$tarjeta['campo']]) ?></h5>
             <p class="dashboard-item-text"><?= escaparDashboard($tarjeta['clave'] === 'noticias' ? $ultimo['titulo'] : ($tarjeta['clave'] === 'boletines' ? ($ultimo['resumen'] ?: 'Documento disponible') : 'Contenido disponible')) ?></p>
-            <small class="text-muted"><i class="ft-calendar"></i> <?= date('d/m/Y', strtotime($ultimo['fecha_publicacion'])) ?></small>
+            <small class="text-muted"><i class="ft-calendar"></i> <?= escaparDashboard(fechaDashboard($ultimo['fecha_publicacion'])) ?></small>
           <?php else: ?>
             <h5 class="dashboard-item-title">Sin contenido todavía</h5>
             <p class="dashboard-item-text">Agrega el primer elemento desde esta sección.</p>
@@ -451,7 +464,7 @@ foreach ($tarjetasDashboard as $tarjeta):
         ?>
           <div class="dashboard-list-item">
             <?php if ($portada): ?><img src="<?= escaparDashboard($portada) ?>" alt="<?= escaparDashboard($reportaje['titulo']) ?>"><?php else: ?><div class="dashboard-list-placeholder"><i class="ft-book"></i></div><?php endif; ?>
-            <div class="dashboard-list-item-content"><strong><?= escaparDashboard($reportaje['titulo']) ?></strong><small><i class="ft-calendar"></i> <?= date('d/m/Y', strtotime($reportaje['fecha_publicacion'])) ?></small></div>
+            <div class="dashboard-list-item-content"><strong><?= escaparDashboard($reportaje['titulo']) ?></strong><small><i class="ft-calendar"></i> <?= escaparDashboard(fechaDashboard($reportaje['fecha_publicacion'])) ?></small></div>
             <div class="dashboard-gallery" aria-label="<?= count($fotos) ?> imágenes del reportaje">
             <?php foreach (array_slice($fotos, 0, 3) as $foto): ?><img class="gallery-thumb" src="<?= escaparDashboard($foto) ?>" alt="Imagen del reportaje"><?php endforeach; ?>
             <?php if (count($fotos) > 3): ?><span class="gallery-more">+<?= count($fotos) - 3 ?></span><?php endif; ?>

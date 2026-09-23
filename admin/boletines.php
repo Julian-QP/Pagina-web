@@ -28,6 +28,19 @@ function escaparBoletin(?string $valor): string
 {
     return htmlspecialchars($valor ?? '', ENT_QUOTES, 'UTF-8');
 }
+
+function fechaBoletinAdmin(?string $valor): string
+{
+    if (!$valor) {
+        return '';
+    }
+    $fecha = DateTime::createFromFormat('Y-m-d', $valor);
+    if (!$fecha) {
+        return $valor;
+    }
+    $meses = [1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic'];
+    return $meses[(int) $fecha->format('n')] . ' ' . $fecha->format('j, Y');
+}
 ?>
 <!DOCTYPE html>
 <html class="loading" lang="en" data-textdirection="ltr">
@@ -164,7 +177,7 @@ function escaparBoletin(?string $valor): string
                     <span class="boletin-status <?= escaparBoletin($boletin['estado']) ?>"><?= ucfirst(escaparBoletin($boletin['estado'])) ?></span>
                     <h2><?= escaparBoletin($boletin['titulo_boletin'] ?: 'Boletín') ?></h2>
                     <?php if ($boletin['resumen']): ?><p class="boletin-summary"><?= escaparBoletin($boletin['resumen']) ?></p><?php endif; ?>
-                    <p class="boletin-date"><?= date('d/m/Y', strtotime($boletin['fecha_publicacion'])) ?></p>
+                    <p class="boletin-date"><?= escaparBoletin(fechaBoletinAdmin($boletin['fecha_publicacion'])) ?></p>
                     <div class="boletin-actions">
                       <a href="config/boletines.php?id=<?= (int) $boletin['id'] ?>">Editar</a>
                       <a href="<?= escaparBoletin($boletin['archivo_pdf']) ?>" target="_blank" rel="noopener">Ver PDF</a><form method="post" onsubmit="return confirm('¿Estás seguro de eliminar este boletín completo?');"><input type="hidden" name="eliminar_id" value="<?= (int) $boletin['id'] ?>"><button type="submit">Eliminar</button></form>

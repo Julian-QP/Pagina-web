@@ -10,10 +10,10 @@ class conexion
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-        $host = getenv('DDP_DB_HOST') ?: '127.0.0.1';
-        $user = getenv('DDP_DB_USER') ?: 'root';
-        $password = getenv('DDP_DB_PASSWORD') ?: '';
-        $database = getenv('DDP_DB_NAME') ?: 'revista_digital';
+        $host = getenv('DDP_DB_HOST') ?: 'sql104.infinityfree.com';
+        $user = getenv('DDP_DB_USER') ?: 'if0_42943815';
+        $password = getenv('DDP_DB_PASSWORD') ?: 'RogJJuli123';
+        $database = getenv('DDP_DB_NAME') ?: 'if0_42943815_revista_digital';
         $port = (int) (getenv('DDP_DB_PORT') ?: 3306);
 
         try {
@@ -32,6 +32,7 @@ class conexion
             foreach ([
                 'palabras_resaltadas' => "ALTER TABLE videos ADD COLUMN palabras_resaltadas VARCHAR(500) NOT NULL DEFAULT '' AFTER portada",
                 'color_resaltado' => "ALTER TABLE videos ADD COLUMN color_resaltado CHAR(7) NOT NULL DEFAULT '#facc15' AFTER palabras_resaltadas",
+                'modo_portada' => "ALTER TABLE videos ADD COLUMN modo_portada VARCHAR(20) NOT NULL DEFAULT 'titulo' AFTER color_resaltado",
             ] as $nombreColumna => $alterar) {
                 $columnaVideo = $this->db->query(
                     "SELECT COUNT(*) AS total
@@ -457,7 +458,7 @@ class conexion
     {
         $filtro = $usuarioId === null ? '' : ' WHERE usuario_id = ? ';
         $consulta = $this->db->prepare(
-            'SELECT id, titulo, url_embed, portada, palabras_resaltadas, color_resaltado, estado, fecha_publicacion
+            'SELECT id, titulo, url_embed, portada, palabras_resaltadas, color_resaltado, modo_portada, estado, fecha_publicacion
              FROM videos
              ' . $filtro . '
              ORDER BY fecha_publicacion DESC, id DESC'
@@ -473,7 +474,7 @@ class conexion
     {
         $filtro = $usuarioId === null ? '' : ' AND usuario_id = ? ';
         $consulta = $this->db->prepare(
-            'SELECT id, titulo, url_embed, portada, palabras_resaltadas, color_resaltado, estado, fecha_publicacion
+            'SELECT id, titulo, url_embed, portada, palabras_resaltadas, color_resaltado, modo_portada, estado, fecha_publicacion
              FROM videos WHERE id = ?' . $filtro . ' LIMIT 1'
         );
         if ($usuarioId === null) $consulta->bind_param('i', $id);
@@ -489,13 +490,13 @@ class conexion
         if ($id === null) {
             $consulta = $this->db->prepare(
                 'INSERT INTO videos
-                    (titulo, url_embed, portada, palabras_resaltadas, color_resaltado, estado, fecha_publicacion, usuario_id)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+                    (titulo, url_embed, portada, palabras_resaltadas, color_resaltado, modo_portada, estado, fecha_publicacion, usuario_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
             );
             $consulta->bind_param(
-                'sssssssi',
+                'ssssssssi',
                 $datos['titulo'], $datos['url_embed'], $datos['portada'],
-                $datos['palabras_resaltadas'], $datos['color_resaltado'],
+                $datos['palabras_resaltadas'], $datos['color_resaltado'], $datos['modo_portada'],
                 $datos['estado'], $datos['fecha_publicacion'], $usuarioId
             );
             $consulta->execute();
@@ -503,14 +504,14 @@ class conexion
         } else {
             $consulta = $this->db->prepare(
                 'UPDATE videos
-                 SET titulo = ?, url_embed = ?, palabras_resaltadas = ?, color_resaltado = ?,
+                 SET titulo = ?, url_embed = ?, palabras_resaltadas = ?, color_resaltado = ?, modo_portada = ?,
                      estado = ?, fecha_publicacion = ?
                  WHERE id = ?'
             );
             $consulta->bind_param(
-                'ssssssi',
+                'sssssssi',
                 $datos['titulo'], $datos['url_embed'], $datos['palabras_resaltadas'],
-                $datos['color_resaltado'], $datos['estado'], $datos['fecha_publicacion'], $id
+                $datos['color_resaltado'], $datos['modo_portada'], $datos['estado'], $datos['fecha_publicacion'], $id
             );
             $consulta->execute();
         }

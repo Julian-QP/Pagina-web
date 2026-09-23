@@ -31,6 +31,19 @@ function escaparPodcast(?string $valor): string
 {
     return htmlspecialchars($valor ?? '', ENT_QUOTES, 'UTF-8');
 }
+
+function fechaPodcast(?string $valor): string
+{
+    if (!$valor) {
+        return '';
+    }
+    $fecha = DateTime::createFromFormat('Y-m-d', $valor);
+    if (!$fecha) {
+        return $valor;
+    }
+    $meses = [1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic'];
+    return $meses[(int) $fecha->format('n')] . ' ' . $fecha->format('j, Y');
+}
 ?>
 <!DOCTYPE html>
 <html class="loading" lang="en" data-textdirection="ltr">
@@ -158,11 +171,10 @@ function escaparPodcast(?string $valor): string
             <div class="podcast-grid">
               <?php foreach ($podcasts as $podcast): ?>
                 <article class="podcast-card" data-filter-card data-name="<?= escaparPodcast($podcast['titulo']) ?>" data-status="<?= escaparPodcast($podcast['estado']) ?>">
-                  <img class="podcast-card-cover" src="../assets/images/podcast.png" alt="<?= escaparPodcast($podcast['titulo']) ?>">
                   <div class="podcast-card-body">
                     <span class="podcast-status <?= escaparPodcast($podcast['estado']) ?>"><?= ucfirst(escaparPodcast($podcast['estado'])) ?></span>
                     <h2><?= escaparPodcast($podcast['titulo']) ?></h2>
-                    <p class="podcast-date"><?= date('d/m/Y', strtotime($podcast['fecha_publicacion'])) ?></p>
+                    <p class="podcast-date"><?= escaparPodcast(fechaPodcast($podcast['fecha_publicacion'])) ?></p>
                     <div class="podcast-actions">
                       <a href="config/podcats.php?id=<?= (int) $podcast['id'] ?>">Editar</a><form method="post" onsubmit="return confirm('¿Estás seguro de eliminar este podcast completo?');"><input type="hidden" name="eliminar_id" value="<?= (int) $podcast['id'] ?>"><button type="submit">Eliminar</button></form>
                     </div>

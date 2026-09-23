@@ -118,7 +118,11 @@ function escapar(?string $valor): string
 function fechaReportaje(string $valor): string
 {
     $fecha = DateTime::createFromFormat('Y-m-d', $valor);
-    return $fecha ? $fecha->format('d/m/Y') : $valor;
+    if (!$fecha) {
+        return $valor;
+    }
+    $meses = [1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic'];
+    return $meses[(int) $fecha->format('n')] . ' ' . $fecha->format('j, Y');
 }
 ?>
 <!DOCTYPE html>

@@ -1,7 +1,3 @@
-<!--
-Author: W3layouts
-Author URL: http://w3layouts.com
--->
 <?php
 require_once __DIR__ . '/admin/conexion.php';
 
@@ -40,7 +36,11 @@ function fechaPublica(?string $valor): string
         return '';
     }
     $fecha = DateTime::createFromFormat('Y-m-d', $valor);
-    return $fecha ? $fecha->format('d/m/Y') : $valor;
+    if (!$fecha) {
+        return $valor;
+    }
+    $meses = [1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic'];
+    return $meses[(int) $fecha->format('n')] . ' ' . $fecha->format('j, Y');
 }
 
 function rutaImagenPublica(?string $ruta, string $predeterminada): string
@@ -57,6 +57,25 @@ function rutaImagenPublica(?string $ruta, string $predeterminada): string
         return 'admin/config/' . $ruta;
     }
     return $ruta;
+}
+
+function miniaturaYoutube(?string $url): ?string
+{
+    $partes = parse_url((string) $url);
+    $host = strtolower((string) ($partes['host'] ?? ''));
+    $ruta = trim((string) ($partes['path'] ?? ''), '/');
+    $consulta = [];
+    parse_str((string) ($partes['query'] ?? ''), $consulta);
+    $videoId = '';
+    if (str_contains($host, 'youtube.com')) {
+        $videoId = str_starts_with($ruta, 'embed/')
+            ? substr($ruta, 6)
+            : (string) ($consulta['v'] ?? '');
+    } elseif ($host === 'youtu.be') {
+        $videoId = $ruta;
+    }
+    $videoId = preg_replace('/[^A-Za-z0-9_-].*$/', '', $videoId) ?? '';
+    return $videoId !== '' ? 'https://img.youtube.com/vi/' . rawurlencode($videoId) . '/hqdefault.jpg' : null;
 }
 
 function decoracionPortadaPublica(?string $valor): array
@@ -197,52 +216,65 @@ $reportajesSecundarios = array_values(array_filter(
       }
       .podcast-card-button { background: none; border: 0; color: inherit; cursor: pointer; display: block; font: inherit; padding: 0; text-align: center; width: 100%; }
       .podcast-card-button:focus-visible { outline: 3px solid #c62828; outline-offset: 4px; }
-      .podcast-player-backdrop { align-items: center; background: rgba(15, 23, 42, .72); backdrop-filter: blur(8px); display: none; inset: 0; justify-content: center; padding: 1rem; position: fixed; z-index: 1080; }
-      .podcast-player-backdrop.is-open { display: flex; }
-      .podcast-player { animation: podcast-player-in .25s ease-out; background: #fff; border: 1px solid rgba(255,255,255,.45); border-radius: 20px; box-shadow: 0 24px 70px rgba(0, 0, 0, .35); max-width: 620px; overflow: hidden; width: 100%; }
-      .podcast-player-header { align-items: flex-start; background: linear-gradient(135deg, #991b1b, #dc2626); color: #fff; display: flex; gap: 1rem; justify-content: space-between; padding: 1.35rem 1.4rem; }
-      .podcast-player-heading { min-width: 0; }
-      .podcast-player-eyebrow { color: rgba(255,255,255,.72); display: block; font-size: .68rem; font-weight: 700; letter-spacing: .14em; margin-bottom: .35rem; text-transform: uppercase; }
-      .podcast-player-title { font-size: clamp(1.05rem, 2.5vw, 1.45rem); font-weight: 700; line-height: 1.25; margin: 0; overflow-wrap: anywhere; }
-      .podcast-player-actions { display: flex; flex-shrink: 0; gap: .45rem; }
-      .podcast-player-action { align-items: center; background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.42); border-radius: 999px; color: #fff; cursor: pointer; display: inline-flex; font-size: .76rem; font-weight: 600; gap: .3rem; line-height: 1; padding: .58rem .75rem; text-decoration: none; transition: background .2s ease, transform .2s ease; }
-      .podcast-player-action:hover, .podcast-player-action:focus-visible { background: #fff; color: #991b1b; text-decoration: none; transform: translateY(-1px); }
-      .podcast-player-content { background: #f8fafc; padding: 1.25rem; }
-      .podcast-player-content iframe { border: 0; border-radius: 12px; box-shadow: 0 6px 18px rgba(15,23,42,.12); display: block; height: 152px; width: 100%; }
-      .podcast-player-content audio { display: block; width: 100%; }
-      .podcast-player-backdrop.is-minimized { align-items: flex-end; background: transparent; bottom: 1rem; inset: auto 1rem 1rem auto; justify-content: flex-end; padding: 0; pointer-events: none; }
-      .podcast-player-backdrop.is-minimized .podcast-player { border-radius: 16px; max-width: 430px; pointer-events: auto; }
-      .podcast-player-backdrop.is-minimized .podcast-player-header { align-items: center; padding: .85rem 1rem; }
-      .podcast-player-backdrop.is-minimized .podcast-player-eyebrow { display: none; }
-      .podcast-player-backdrop.is-minimized .podcast-player-title { font-size: .9rem; }
-      .podcast-player-backdrop.is-minimized .podcast-player-content { padding: .75rem; }
-      .podcast-player-backdrop.is-minimized .podcast-player-content iframe { height: 80px; }
-      .visual-player-content iframe { background: #000; border: 0; border-radius: 12px; display: block; height: min(55vw, 430px); width: 100%; }
+      .podcast-inline-card { cursor: pointer; position: relative; }
+      .podcast-inline-card:hover { box-shadow: 0 12px 28px rgba(127,29,29,.16); }
+      .podcast-inline-card::after { background: linear-gradient(135deg, rgba(127,29,29,.08), rgba(15,23,42,.2)); content: ""; inset: 0; opacity: 0; pointer-events: none; position: absolute; transition: opacity .25s ease; }
+      .podcast-inline-card:hover::after, .podcast-inline-card:focus-visible::after { opacity: 1; }
+      .podcast-image { display: block; margin: 0 auto; position: relative; width: 96px; }
+      .podcast-image img { display: block; height: 96px; object-fit: cover; width: 96px; }
+      .podcast-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .podcast-grid > .podcast-grid-item { min-width: 0; }
+      @media (max-width: 991.98px) {
+        .podcast-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 575.98px) {
+        .podcast-grid { grid-template-columns: 1fr; }
+      }
+      .podcast-play-control { align-items: center; background: rgba(127,29,29,.92); border: 0; border-radius: 50%; bottom: 1rem; color: #fff; display: none; height: 30px; justify-content: center; left: 50%; position: absolute; transform: translateX(-50%); width: 30px; z-index: 3; }
+      .podcast-inline-card.is-playing .podcast-play-control, .podcast-inline-card.is-paused .podcast-play-control { display: inline-flex; }
+      .podcast-play-control:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+      .podcast-inline-player { margin: .6rem auto 0; position: relative; width: 100%; z-index: 2; }
+      .podcast-inline-player audio { display: block; height: 1px; width: 1px; }
+      .podcast-inline-player iframe { border: 0; border-radius: 8px; display: block; height: 80px; opacity: 1; width: 100%; }
+      .podcast-inline-card.is-spotify .podcast-play-control,
+      .podcast-inline-card.is-spotify .podcast-playing-indicator { display: none; }
+      .podcast-inline-link { background: #991b1b; border-radius: 999px; color: #fff !important; display: inline-flex; font-size: .68rem; font-weight: 700; margin-top: .45rem; padding: .35rem .55rem; position: relative; z-index: 2; }
+      .podcast-play-label { color: #991b1b; display: block; font-size: .78rem; font-weight: 700; margin-top: .35rem; }
+      .podcast-playing-indicator { align-items: flex-end; background: rgba(15,23,42,.78); border-radius: 999px; bottom: .4rem; display: none; gap: 3px; height: 24px; left: 50%; padding: 0 .55rem; position: absolute; transform: translateX(-50%); z-index: 2; }
+      .podcast-inline-card.is-playing .podcast-playing-indicator { display: inline-flex; }
+      .podcast-playing-indicator span { animation: podcast-wave 1s ease-in-out infinite alternate; background: #dc2626; border-radius: 2px; height: 8px; width: 3px; }
+      .podcast-playing-indicator span:nth-child(2) { animation-delay: -.25s; height: 15px; }
+      .podcast-playing-indicator span:nth-child(3) { animation-delay: -.5s; height: 11px; }
+      .podcast-playing-indicator span:nth-child(4) { animation-delay: -.75s; height: 18px; }
+      @keyframes podcast-wave { from { transform: scaleY(.55); } to { transform: scaleY(1.15); } }
       .especiales-card-button { background: none; border: 0; color: inherit; cursor: pointer; display: block; font: inherit; padding: 0; text-align: inherit; width: 100%; }
-      @keyframes podcast-player-in { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-      @media (max-width: 575px) {
-        .podcast-player-backdrop.is-minimized { bottom: .5rem; left: .5rem; right: .5rem; }
-        .podcast-player-backdrop.is-minimized .podcast-player { max-width: none; }
-      }
-      @media (max-width: 640px) {
-        .podcast-player-header { flex-direction: column; padding: 1.15rem; }
-        .podcast-player-actions { width: 100%; }
-        .podcast-player-action { justify-content: center; flex: 1; }
-      }
       .especiales-section { background: #f8fafc; }
       .especiales-heading { margin-bottom: 2.5rem; }
       .especiales-kicker { color: #b91c1c; display: block; font-size: .72rem; font-weight: 700; letter-spacing: .16em; margin-bottom: .45rem; text-transform: uppercase; }
       .especiales-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 8px 24px rgba(15,23,42,.07); height: 100%; overflow: hidden; }
       .especiales-card:hover { box-shadow: 0 12px 28px rgba(15,23,42,.1); }
       .especiales-media { align-items: center; aspect-ratio: 16 / 10; background: #050505; display: flex; justify-content: center; overflow: hidden; position: relative; transition: transform .3s ease; }
-      .especiales-media img { display: none; }
+      .especiales-media img { display: block; height: 100%; object-fit: cover; width: 100%; }
       .especiales-media::after { border: 1px solid rgba(255,255,255,.12); content: ""; inset: 12px; pointer-events: none; position: absolute; }
-      .especiales-card:hover .especiales-media { transform: scale(1.04); }
+      .especiales-media[data-video-url] { cursor: pointer; }
+      .especiales-card:hover .especiales-media img { transform: scale(1.04); }
+      .especiales-media::before { background: linear-gradient(135deg, rgba(127,29,29,.15), rgba(15,23,42,.72)); content: ""; inset: 0; opacity: 0; pointer-events: none; position: absolute; transition: opacity .25s ease; z-index: 1; }
+      .especiales-media:hover::before, .especiales-media:focus-visible::before { opacity: 1; }
       .especiales-overlay-title { color: #fff; font-size: clamp(1rem, 2vw, 1.3rem); font-weight: 700; left: 1.5rem; line-height: 1.3; margin: 0; max-width: 82%; position: absolute; right: 1.5rem; text-align: center; top: 50%; transform: translateY(-50%); z-index: 1; }
+      .especiales-play-label { background: rgba(127, 29, 29, .92); border-radius: 999px; bottom: 1rem; color: #fff; font-size: .8rem; font-weight: 700; left: 50%; opacity: 0; padding: .5rem .85rem; position: absolute; transform: translateX(-50%) translateY(6px); transition: opacity .25s ease, transform .25s ease; z-index: 2; }
+      .especiales-media:hover .especiales-play-label, .especiales-media:focus-visible .especiales-play-label { opacity: 1; transform: translateX(-50%) translateY(0); }
+      .especiales-inline-video { border: 0; height: 100%; position: absolute; inset: 0; width: 100%; z-index: 3; }
+      .especiales-inline-link { background: rgba(15, 23, 42, .9); bottom: .75rem; color: #fff !important; font-size: .75rem; padding: .4rem .65rem; position: absolute; right: .75rem; z-index: 4; }
       .especiales-highlight { background: #facc15; box-decoration-break: clone; -webkit-box-decoration-break: clone; color: #fff !important; padding: .08rem .3rem; }
       .especiales-card-caption { color: #64748b; font-size: 1.1rem; font-weight: 600; line-height: 1.5; margin: 0; padding: .9rem 1rem 1.1rem; }
       .reportaje-public-cover { background: linear-gradient(to bottom, var(--decoracion-rojo) 0 50%, var(--decoracion-azul) 50% 100%); display: block; height: 220px; overflow: hidden; }
       .reportaje-public-cover svg { display: block; height: 250px; width: 100%; }
+      .reportaje-destacado-container { margin-left: auto; margin-right: auto; max-width: 1200px; padding-left: 15px; padding-right: 15px; }
+      .reportaje-destacado-container .video-grids-info { margin-left: 0; margin-right: 0; }
+      .reportaje-destacado-container .video-gd-right { margin-top: 110px; }
+      @media (max-width: 991.98px) {
+        .reportaje-destacado-container .video-gd-right { margin-top: 0; }
+      }
       .grids-block-5 .row { align-items: stretch; }
       .grids-block-5 .grids5-info { display: flex; flex-direction: column; height: auto; }
       .grids-block-5 .grids5-info > a:first-child { display: block; flex: 0 0 250px; height: 250px; overflow: hidden; }
@@ -359,11 +391,11 @@ $reportajesSecundarios = array_values(array_filter(
 </section>
 <section class="w3l-video w3l-homeblock3 " id="video">
     <!-- /video-6-->
-    <div class="container-fluid">
+    <div class="reportaje-destacado-container">
         <div class="video-grids-info row">
             <div class="video-gd-right col-lg-6 p-0">
                 <div class="position-relative">
-                    <a href="<?= $reportajeReciente ? '../conte_reportaje.php?id=' . (int) $reportajeReciente['id'] : '#actualidad' ?>"><img src="<?= escaparPublico(rutaImagenPublica($reportajeReciente['foto_principal'] ?? '', 'assets/images/video.jpg')) ?>" alt="<?= escaparPublico($reportajeReciente['titulo'] ?? 'Publicación reciente') ?>" class="img-fluid" style="width: 100%; height: 560px; object-fit: cover;"></a>
+                    <a href="<?= $reportajeReciente ? 'conte_reportaje.php?id=' . (int) $reportajeReciente['id'] : '#actualidad' ?>"><img src="<?= escaparPublico(rutaImagenPublica($reportajeReciente['foto_principal'] ?? '', 'assets/images/video.jpg')) ?>" alt="<?= escaparPublico($reportajeReciente['titulo'] ?? 'Publicación reciente') ?>" class="img-fluid" style="width: 100%; height: 400px; object-fit: cover;"></a>
                     <a href="#small-dialog" class="popup-with-zoom-anim play-view text-center position-absolute">
                         <!--<span class="video-play-icon">
                             <span class="fa fa-play"></span>
@@ -379,9 +411,9 @@ $reportajesSecundarios = array_values(array_filter(
                 <div class="p-xl-4 p-0 video-wrap">
                     <h5><?= escaparPublico(fechaPublica($reportajeReciente['fecha_publicacion'] ?? null)) ?></h5>
                     <?php if (!empty($reportajeReciente['es_destacado'])): ?><span class="destacado-badge"><i class="bi bi-star-fill" aria-hidden="true"></i> Reportaje destacado</span><?php endif; ?>
-					<h3 class="title-big text-left mb-4 reportaje-title-safe"><a href="<?= $reportajeReciente ? '../conte_reportaje.php?id=' . (int) $reportajeReciente['id'] : '#actualidad' ?>"><?= escaparPublico($reportajeReciente['titulo'] ?? 'No hay publicaciones recientes') ?></a></h3>
+					<h3 class="title-big text-left mb-4 reportaje-title-safe"><a href="<?= $reportajeReciente ? 'conte_reportaje.php?id=' . (int) $reportajeReciente['id'] : '#actualidad' ?>"><?= escaparPublico($reportajeReciente['titulo'] ?? 'No hay publicaciones recientes') ?></a></h3>
                     <p><?= escaparPublico($reportajeReciente['resumen_corto'] ?? '') ?></p>
-					<a href="<?= $reportajeReciente ? '../conte_reportaje.php?id=' . (int) $reportajeReciente['id'] : '#actualidad' ?>" class="btn mt-4 p-0">Leer <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+					<a href="<?= $reportajeReciente ? 'conte_reportaje.php?id=' . (int) $reportajeReciente['id'] : '#actualidad' ?>" class="btn mt-4 p-0">Leer <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
                     <!--<a href="#start" class="btn btn-style btn-primary mt-md-5 mt-4"> Más Videos </a>-->
                 </div>
             </div>
@@ -398,10 +430,10 @@ $reportajesSecundarios = array_values(array_filter(
                 <?php
                 $fotosReportaje = $reportaje['fotos'] ? explode('||', $reportaje['fotos']) : [];
                 $imagenReportaje = rutaImagenPublica($reportaje['foto_principal'] ?: ($fotosReportaje[0] ?? ''), 'assets/images/reportaje-18-08-26.jpg');
-                $enlaceReportaje = '../conte_reportaje.php?id=' . (int) $reportaje['id'];
+                $enlaceReportaje = 'conte_reportaje.php?id=' . (int) $reportaje['id'];
                 ?>
                 <div class="col-lg-4 col-md-6 grids5-info mt-5 reportajes-secundarios">
-                    <a href="<?= $enlaceReportaje ?>" class="d-block reportaje-public-cover" style="--decoracion-rojo: <?= escaparPublico($decoracionPortada['color_rojo']) ?>; --decoracion-azul: <?= escaparPublico($decoracionPortada['color_azul']) ?>;"><svg viewBox="0 0 700 450" preserveAspectRatio="none" role="img" aria-label="<?= escaparPublico($reportaje['titulo']) ?>"><defs><clipPath id="decoracion-portada-<?= (int) $reportaje['id'] ?>"><path d="<?= escaparPublico($rutaDecoracionSvg) ?>"></path></clipPath></defs><image href="<?= escaparPublico($imagenReportaje) ?>" x="0" y="0" width="700" height="450" preserveAspectRatio="xMidYMid slice" clip-path="url(#decoracion-portada-<?= (int) $reportaje['id'] ?>)"></image></svg></a>
+                    <a href="<?= $enlaceReportaje ?>" class="d-block reportaje-public-cover" style="--decoracion-rojo: <?= escaparPublico($decoracionPortada['color_rojo']) ?>; --decoracion-azul: <?= escaparPublico($decoracionPortada['color_azul']) ?>;"><svg viewBox="0 0 700 450" preserveAspectRatio="none" role="img" aria-label="<?= escaparPublico($reportaje['titulo']) ?>"><defs><clipPath id="decoracion-portada-inicio-<?= (int) $reportaje['id'] ?>"><path d="<?= escaparPublico($rutaDecoracionSvg) ?>"></path></clipPath></defs><image href="<?= escaparPublico($imagenReportaje) ?>" x="0" y="0" width="700" height="450" preserveAspectRatio="xMidYMid slice" clip-path="url(#decoracion-portada-inicio-<?= (int) $reportaje['id'] ?>)"></image></svg></a>
                     <div class="blog-info">
                         <h5><?= escaparPublico(fechaPublica($reportaje['fecha_publicacion'])) ?></h5>
                         <h4 class="reportaje-title-safe"><a href="<?= $enlaceReportaje ?>" class="d-block"><?= escaparPublico($reportaje['titulo']) ?></a></h4>
@@ -670,14 +702,19 @@ $reportajesSecundarios = array_values(array_filter(
     <div class="container py-lg-5 py-md-4">
         <!--<h5 class="title-small mb-1 text-center">12 speakers and 20 fun events.</h5>-->
         <h3 class="title-big mb-5 text-center">Podcast</h3>
-        <div class="row">
+        <div class="podcast-grid">
             <?php foreach (array_slice($podcastsPublicos, 0, 4) as $podcast): ?>
-            <div class="col-lg-3 col-sm-6">
+            <div class="podcast-grid-item">
                 <div class="area-box">
-                    <button type="button" class="podcast-card-button" data-podcast-url="<?= escaparPublico($podcast['url_embed']) ?>" data-podcast-title="<?= escaparPublico($podcast['titulo']) ?>">
-                        <img src="assets/images/podcast.png" alt="<?= escaparPublico($podcast['titulo']) ?>" style="width: 96px; height: 96px; object-fit: cover;">
+                    <div class="podcast-card-button podcast-inline-card" data-podcast-url="<?= escaparPublico($podcast['url_embed']) ?>" data-podcast-title="<?= escaparPublico($podcast['titulo']) ?>" role="button" tabindex="0" aria-label="Reproducir <?= escaparPublico($podcast['titulo']) ?>">
+                        <span class="podcast-image">
+                            <img src="assets/images/podcast.png" alt="<?= escaparPublico($podcast['titulo']) ?>">
+                            <span class="podcast-playing-indicator" aria-label="Reproduciendo"><span></span><span></span><span></span><span></span></span>
+                            <button type="button" class="podcast-play-control" aria-label="Pausar"><i class="bi bi-pause-fill" aria-hidden="true"></i></button>
+                        </span>
                         <p><?= escaparPublico($podcast['titulo']) ?></p>
-                    </button>
+                        <span class="podcast-play-label">Reproducir</span>
+                    </div>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -686,45 +723,6 @@ $reportajesSecundarios = array_values(array_filter(
 		<center><a href="#btn" class="btn btn-style btn-primary mt-md-5 mt-4">Ver todos</a></center>
     </div>
 </section>
-
-<div class="podcast-player-backdrop" id="podcast-player-backdrop" aria-hidden="true">
-  <div class="podcast-player" role="dialog" aria-modal="true" aria-labelledby="podcast-player-title">
-    <div class="podcast-player-header">
-      <div class="podcast-player-heading">
-        <span class="podcast-player-eyebrow">Reproduciendo ahora</span>
-        <h2 class="podcast-player-title" id="podcast-player-title"></h2>
-      </div>
-      <div class="podcast-player-actions">
-        <a class="podcast-player-action" id="podcast-player-redirect" href="#" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Abrir</a>
-        <button type="button" class="podcast-player-action" id="podcast-player-minimize"><i class="bi bi-dash-lg" aria-hidden="true"></i> Minimizar</button>
-        <button type="button" class="podcast-player-action" id="podcast-player-close"><i class="bi bi-x-lg" aria-hidden="true"></i> Cerrar</button>
-      </div>
-    </div>
-    <div class="podcast-player-content">
-      <iframe id="podcast-player-iframe" title="Reproductor de podcast" allow="autoplay; encrypted-media" allowfullscreen hidden></iframe>
-      <audio id="podcast-player-audio" controls preload="metadata" hidden></audio>
-    </div>
-  </div>
-</div>
-
-<div class="podcast-player-backdrop" id="visual-player-backdrop" aria-hidden="true">
-  <div class="podcast-player" role="dialog" aria-modal="true" aria-labelledby="visual-player-title">
-    <div class="podcast-player-header">
-      <div class="podcast-player-heading">
-        <span class="podcast-player-eyebrow">Contenido audiovisual</span>
-        <h2 class="podcast-player-title" id="visual-player-title"></h2>
-      </div>
-      <div class="podcast-player-actions">
-        <a class="podcast-player-action" id="visual-player-redirect" href="#" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Abrir enlace original</a>
-        <button type="button" class="podcast-player-action" id="visual-player-close"><i class="bi bi-x-lg" aria-hidden="true"></i> Cerrar</button>
-      </div>
-    </div>
-    <div class="podcast-player-content visual-player-content">
-      <iframe id="visual-player-iframe" title="Reproductor de video" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-    </div>
-  </div>
-</div>
-
 
 <!-- logos Section --
 <section class="w3l-logos w3l-homeblock3 py-5">
@@ -775,12 +773,11 @@ $reportajesSecundarios = array_values(array_filter(
                         <?php foreach (array_slice($videosPublicos, 0, 8) as $video): ?>
 						<div class="item">
 							<div class="especiales-card text-left">
-								<button type="button" class="especiales-card-button" data-video-url="<?= escaparPublico($video['url_embed']) ?>" data-video-title="<?= escaparPublico($video['titulo']) ?>">
-                                    <div class="especiales-media">
-                                        <img src="<?= escaparPublico(rutaImagenPublica($video['portada'] ?? '', 'assets/images/video.jpg')) ?>" alt="<?= escaparPublico($video['titulo']) ?>">
-                                        <h4 class="especiales-overlay-title"><?= tituloEspecial($video['titulo'], $video['palabras_resaltadas'] ?? '', $video['color_resaltado'] ?? '') ?></h4>
-                                    </div>
-								</button>
+                                <?php $miniatura = ($video['modo_portada'] ?? 'titulo') === 'youtube' ? miniaturaYoutube($video['url_embed']) : null; ?>
+                                <div class="especiales-media" data-video-url="<?= escaparPublico($video['url_embed']) ?>" data-video-title="<?= escaparPublico($video['titulo']) ?>" data-video-original="<?= escaparPublico($video['url_embed']) ?>" role="button" tabindex="0" aria-label="Reproducir <?= escaparPublico($video['titulo']) ?>">
+                                    <?php if ($miniatura): ?><img src="<?= escaparPublico($miniatura) ?>" alt="<?= escaparPublico($video['titulo']) ?>"><?php else: ?><h4 class="especiales-overlay-title"><?= tituloEspecial($video['titulo'], $video['palabras_resaltadas'] ?? '', $video['color_resaltado'] ?? '') ?></h4><?php endif; ?>
+                                    <span class="especiales-play-label"><i class="bi bi-play-fill" aria-hidden="true"></i> Reproducir</span>
+                                </div>
 							</div>
                             <p class="especiales-card-caption"><?= escaparPublico($video['titulo']) ?></p>
 						</div>
@@ -1251,34 +1248,6 @@ $reportajesSecundarios = array_values(array_filter(
 
 <script>
   (() => {
-    const backdrop = document.getElementById('podcast-player-backdrop');
-    const title = document.getElementById('podcast-player-title');
-    const iframe = document.getElementById('podcast-player-iframe');
-    const audio = document.getElementById('podcast-player-audio');
-    const redirect = document.getElementById('podcast-player-redirect');
-    const minimize = document.getElementById('podcast-player-minimize');
-    const close = document.getElementById('podcast-player-close');
-
-    if (!backdrop || !title || !iframe || !audio || !redirect || !minimize || !close) {
-      return;
-    }
-
-    const detenerReproduccion = () => {
-      audio.pause();
-      audio.removeAttribute('src');
-      audio.load();
-      iframe.src = 'about:blank';
-      iframe.hidden = true;
-      audio.hidden = true;
-    };
-
-    const cerrarReproductor = () => {
-      detenerReproduccion();
-      backdrop.classList.remove('is-open', 'is-minimized');
-      backdrop.setAttribute('aria-hidden', 'true');
-      minimize.textContent = 'Minimizar';
-    };
-
     const normalizarSpotify = (url) => {
       const coincidencia = url.match(/spotify\.com\/(?:embed\/)?(?:[^/]+\/)?(track|episode|show|playlist|album|artist)\/([^/?#]+)/i);
       if (!coincidencia) {
@@ -1290,57 +1259,150 @@ $reportajesSecundarios = array_values(array_filter(
       };
     };
 
-    document.querySelectorAll('[data-podcast-url]').forEach((boton) => {
-      boton.addEventListener('click', () => {
-        const url = boton.dataset.podcastUrl || '';
-        const nombre = boton.dataset.podcastTitle || 'Podcast';
-        const spotify = normalizarSpotify(url);
+    let podcastActivo = null;
+    let tarjetaActiva = null;
 
-        detenerReproduccion();
-        title.textContent = nombre;
-        redirect.href = spotify ? spotify.public : url;
-        backdrop.classList.add('is-open');
-        backdrop.classList.remove('is-minimized');
-        backdrop.setAttribute('aria-hidden', 'false');
+    const actualizarControl = (card, pausado) => {
+      const control = card.querySelector('.podcast-play-control');
+      if (!control) return;
+      control.setAttribute('aria-label', pausado ? 'Reproducir' : 'Pausar');
+      control.innerHTML = `<i class="bi bi-${pausado ? 'play' : 'pause'}-fill" aria-hidden="true"></i>`;
+    };
 
-        if (spotify) {
-          iframe.src = `${spotify.embed}?autoplay=1`;
-          iframe.hidden = false;
-        } else {
-          audio.src = url;
-          audio.hidden = false;
+    const detenerPodcast = (card) => {
+      if (!card) return;
+      const audio = card.querySelector('audio');
+      const iframe = card.querySelector('iframe');
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+      if (iframe) {
+        iframe.src = 'about:blank';
+      }
+      card.classList.remove('is-playing');
+      card.classList.add('is-paused');
+      actualizarControl(card, true);
+    };
+
+    const reproducirPodcast = (card) => {
+      const url = card.dataset.podcastUrl || '';
+      const nombre = card.dataset.podcastTitle || 'Podcast';
+      const spotify = normalizarSpotify(url);
+      if (tarjetaActiva && tarjetaActiva !== card) {
+        detenerPodcast(tarjetaActiva);
+      }
+      card.dataset.reproduciendo = 'true';
+      tarjetaActiva = card;
+      card.classList.add('is-playing');
+      card.classList.remove('is-paused');
+      if (spotify) {
+        card.classList.add('is-spotify');
+      }
+      card.removeAttribute('role');
+      card.removeAttribute('tabindex');
+      const player = document.createElement('div');
+      player.className = 'podcast-inline-player';
+      if (spotify) {
+        const iframe = document.createElement('iframe');
+        iframe.src = `${spotify.embed}?autoplay=1`;
+        iframe.title = nombre;
+        iframe.allow = 'autoplay; encrypted-media; clipboard-write';
+        iframe.setAttribute('allowfullscreen', '');
+        player.appendChild(iframe);
+        card.dataset.spotifyEmbed = spotify.embed;
+      } else {
+        const audio = document.createElement('audio');
+        audio.preload = 'auto';
+        audio.autoplay = true;
+        audio.src = url;
+        player.appendChild(audio);
+        podcastActivo = audio;
+        audio.addEventListener('play', () => {
+          card.classList.add('is-playing');
+          card.classList.remove('is-paused');
+          actualizarControl(card, false);
+        });
+        audio.addEventListener('pause', () => {
+          card.classList.remove('is-playing');
+          card.classList.add('is-paused');
+          actualizarControl(card, true);
+        });
+        audio.addEventListener('ended', () => {
+          card.classList.remove('is-playing', 'is-paused');
+          card.dataset.reproduciendo = 'false';
+          actualizarControl(card, true);
+        });
+        audio.load();
+        void audio.play().catch(() => {
+          card.classList.remove('is-playing');
+          card.classList.add('is-paused');
+          actualizarControl(card, true);
+        });
+      }
+      const link = document.createElement('a');
+      link.className = 'podcast-inline-link';
+      link.href = spotify ? spotify.public : url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.append(document.createTextNode('Abrir original '));
+      const icon = document.createElement('i');
+      icon.className = 'bi bi-box-arrow-up-right';
+      icon.setAttribute('aria-hidden', 'true');
+      link.appendChild(icon);
+      card.append(player, link);
+      actualizarControl(card, false);
+    };
+
+    const alternarPodcast = (card) => {
+      if (card.dataset.reproduciendo !== 'true') {
+        reproducirPodcast(card);
+        return;
+      }
+      const audio = card.querySelector('audio');
+      const iframe = card.querySelector('iframe');
+      if (audio) {
+        if (audio.paused) {
           void audio.play();
+          card.classList.add('is-playing');
+          card.classList.remove('is-paused');
+          actualizarControl(card, false);
+        } else {
+          audio.pause();
+          card.classList.remove('is-playing');
+          card.classList.add('is-paused');
+          actualizarControl(card, true);
         }
-      });
-    });
+      } else if (iframe) {
+        const pausado = card.classList.contains('is-paused');
+        iframe.src = pausado ? `${card.dataset.spotifyEmbed}?autoplay=1` : 'about:blank';
+        card.classList.toggle('is-playing', pausado);
+        card.classList.toggle('is-paused', !pausado);
+        actualizarControl(card, !pausado);
+      }
+    };
 
-    minimize.addEventListener('click', () => {
-      const minimizado = backdrop.classList.toggle('is-minimized');
-      minimize.textContent = minimizado ? 'Ampliar' : 'Minimizar';
-    });
-
-    close.addEventListener('click', cerrarReproductor);
-    backdrop.addEventListener('click', (event) => {
-      if (event.target === backdrop) {
-        cerrarReproductor();
+    document.addEventListener('click', (event) => {
+      const card = event.target.closest('.podcast-inline-card[data-podcast-url]');
+      if (!card || event.target.closest('.podcast-inline-link')) return;
+      if (event.target.closest('.podcast-play-control')) {
+        alternarPodcast(card);
+      } else if (!card.dataset.reproduciendo) {
+        reproducirPodcast(card);
+      } else if (card.classList.contains('is-paused')) {
+        alternarPodcast(card);
       }
     });
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && backdrop.classList.contains('is-open')) {
-        cerrarReproductor();
+      if ((event.key === 'Enter' || event.key === ' ') && event.target.matches('.podcast-inline-card[data-podcast-url]')) {
+        event.preventDefault();
+        alternarPodcast(event.target);
       }
     });
   })();
 </script>
 <script>
   (() => {
-    const backdrop = document.getElementById('visual-player-backdrop');
-    const title = document.getElementById('visual-player-title');
-    const iframe = document.getElementById('visual-player-iframe');
-    const redirect = document.getElementById('visual-player-redirect');
-    const close = document.getElementById('visual-player-close');
-    if (!backdrop || !title || !iframe || !redirect || !close) return;
-
     const videoEmbedUrl = (value) => {
       try {
         const url = new URL(value, window.location.href);
@@ -1357,29 +1419,60 @@ $reportajesSecundarios = array_values(array_filter(
       }
     };
 
-    const closeVisualPlayer = () => {
-      iframe.src = 'about:blank';
-      backdrop.classList.remove('is-open');
-      backdrop.setAttribute('aria-hidden', 'true');
+    const videoOriginalUrl = (value) => {
+      try {
+        const url = new URL(value, window.location.href);
+        if (url.hostname.includes('youtube.com') && url.pathname.startsWith('/embed/')) {
+          return `https://www.youtube.com/watch?v=${url.pathname.slice(7).split('/')[0]}`;
+        }
+        if (url.hostname.includes('youtu.be')) {
+          return `https://www.youtube.com/watch?v=${url.pathname.slice(1).split('/')[0]}`;
+        }
+        return url.href;
+      } catch {
+        return value;
+      }
     };
 
-    document.querySelectorAll('[data-video-url]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const originalUrl = button.dataset.videoUrl || '';
-        title.textContent = button.dataset.videoTitle || 'Video';
-        redirect.href = originalUrl;
-        iframe.src = videoEmbedUrl(originalUrl);
-        backdrop.classList.add('is-open');
-        backdrop.setAttribute('aria-hidden', 'false');
-      });
-    });
+    const reproducirEnTarjeta = (media) => {
+      if (media.dataset.reproduciendo === 'true') return;
+      const url = media.dataset.videoUrl || '';
+      const original = videoOriginalUrl(media.dataset.videoOriginal || url);
+      const titulo = media.dataset.videoTitle || 'Video';
+      media.dataset.reproduciendo = 'true';
+      media.removeAttribute('role');
+      media.removeAttribute('tabindex');
+      media.replaceChildren();
+      const iframe = document.createElement('iframe');
+      iframe.className = 'especiales-inline-video';
+      iframe.src = videoEmbedUrl(url);
+      iframe.title = titulo;
+      iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+      iframe.allowFullscreen = true;
+      const link = document.createElement('a');
+      link.className = 'especiales-inline-link';
+      link.href = original;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = 'Abrir original ';
+      const icon = document.createElement('i');
+      icon.className = 'bi bi-box-arrow-up-right';
+      icon.setAttribute('aria-hidden', 'true');
+      link.appendChild(icon);
+      media.append(iframe, link);
+    };
 
-    close.addEventListener('click', closeVisualPlayer);
-    backdrop.addEventListener('click', (event) => {
-      if (event.target === backdrop) closeVisualPlayer();
+    document.addEventListener('click', (event) => {
+      const media = event.target.closest('.especiales-media[data-video-url]');
+      if (media && !event.target.closest('.especiales-inline-link')) {
+        reproducirEnTarjeta(media);
+      }
     });
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && backdrop.classList.contains('is-open')) closeVisualPlayer();
+      if ((event.key === 'Enter' || event.key === ' ') && event.target.matches('.especiales-media[data-video-url]')) {
+        event.preventDefault();
+        reproducirEnTarjeta(event.target);
+      }
     });
   })();
 </script>

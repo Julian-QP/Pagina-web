@@ -24,6 +24,7 @@ $formulario = [
     'url_embed' => $existente['url_embed'] ?? '',
     'palabras_resaltadas' => $existente['palabras_resaltadas'] ?? '',
     'color_resaltado' => $existente['color_resaltado'] ?? '#facc15',
+    'modo_portada' => $existente['modo_portada'] ?? 'titulo',
     'estado' => $existente['estado'] ?? 'borrador',
     'fecha_publicacion' => $existente['fecha_publicacion'] ?? date('Y-m-d'),
 ];
@@ -56,10 +57,13 @@ function normalizarUrlVideo(string $url): string
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    foreach (['titulo', 'url_embed', 'palabras_resaltadas', 'color_resaltado', 'estado', 'fecha_publicacion'] as $campo) {
+    foreach (['titulo', 'url_embed', 'palabras_resaltadas', 'color_resaltado', 'modo_portada', 'estado', 'fecha_publicacion'] as $campo) {
         $formulario[$campo] = trim((string) ($_POST[$campo] ?? ''));
     }
     $formulario['url_embed'] = normalizarUrlVideo($formulario['url_embed']);
+    $formulario['modo_portada'] = in_array($formulario['modo_portada'], ['titulo', 'youtube'], true)
+        ? $formulario['modo_portada']
+        : 'titulo';
     $formulario['estado'] = estadoContenidoPermitido($formulario['estado']);
 
     if ($formulario['titulo'] === '' || $formulario['url_embed'] === '' ||
@@ -164,6 +168,13 @@ $guardado = isset($_GET['guardado']);
               <strong><?= escaparVideo($formulario['titulo']) ?></strong>
             </div>
           </div>
+          <label>Tipo de portada *
+            <select name="modo_portada" required>
+              <option value="titulo" <?= $formulario['modo_portada'] === 'titulo' ? 'selected' : '' ?>>Mostrar título con resaltado</option>
+              <option value="youtube" <?= $formulario['modo_portada'] === 'youtube' ? 'selected' : '' ?>>Mostrar miniatura de YouTube</option>
+            </select>
+            <small>La miniatura se obtiene automáticamente desde el enlace de YouTube.</small>
+          </label>
           <div class="videos-form-grid">
             <label>Estado
               <select name="estado"><option value="borrador" <?= $formulario['estado'] === 'borrador' || esRedactor() ? 'selected' : '' ?>>Borrador</option><?php if (!esRedactor()): ?><option value="publicado" <?= $formulario['estado'] === 'publicado' ? 'selected' : '' ?>>Publicado</option><?php endif; ?></select>

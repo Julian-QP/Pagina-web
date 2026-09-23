@@ -99,7 +99,26 @@ function fechaDetalle(?string $valor): string
         return '';
     }
     $fecha = DateTime::createFromFormat('Y-m-d', $valor);
-    return $fecha ? $fecha->format('d/m/Y') : $valor;
+    if (!$fecha) {
+        return $valor;
+    }
+
+    $meses = [
+        1 => 'Ene',
+        2 => 'Feb',
+        3 => 'Mar',
+        4 => 'Abr',
+        5 => 'May',
+        6 => 'Jun',
+        7 => 'Jul',
+        8 => 'Ago',
+        9 => 'Sep',
+        10 => 'Oct',
+        11 => 'Nov',
+        12 => 'Dic',
+    ];
+
+    return $meses[(int) $fecha->format('n')] . ' ' . $fecha->format('j, Y');
 }
 
 $imagen = imagenDetalle($reportaje['foto_principal']);
@@ -133,21 +152,6 @@ $ultimos = array_values(array_filter(
     <style>
         .reportaje-content-image {
             display: block;
-            height: 420px;
-            object-fit: cover;
-            width: 100%;
-        }
-
-        .reportaje-cover-decoration {
-            background: linear-gradient(to bottom, var(--decoracion-rojo) 50%, var(--decoracion-azul) 50%);
-            border-radius: 24px;
-            height: 420px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .reportaje-cover-decoration img {
-            clip-path: polygon(0 0, var(--decoracion-rojo-x, 60%) 0, 72% .7%, 82% 3.3%, 90% 8.1%, 96% 20%, 99% 36.5%, 100% 43%, 100% 50%, 99% 63.5%, 96% 80%, 90% 91.9%, 82% 96.7%, var(--decoracion-azul-x, 80%) 100%, 0 100%);
             height: 420px;
             object-fit: cover;
             width: 100%;
@@ -263,9 +267,7 @@ $ultimos = array_values(array_filter(
                     </div>
                     <div class="single-post-image mb-4 text-center">
                         <?php if ($enlacePdf !== ''): ?><a target="_blank" href="<?= escaparDetalle($enlacePdf) ?>"><?php endif; ?>
-                        <div class="reportaje-cover-decoration" style="--decoracion-rojo: <?= escaparDetalle($decoracion['color_rojo']) ?>; --decoracion-azul: <?= escaparDetalle($decoracion['color_azul']) ?>; --decoracion-rojo-x: <?= $decoracionRojoPorcentaje ?>%; --decoracion-azul-x: <?= $decoracionAzulPorcentaje ?>%;">
-                            <img src="<?= escaparDetalle($imagen) ?>" class="img-fluid reportaje-content-image radius-image" alt="<?= escaparDetalle($reportaje['titulo']) ?>">
-                        </div>
+                        <img src="<?= escaparDetalle($imagen) ?>" class="img-fluid reportaje-content-image radius-image" alt="<?= escaparDetalle($reportaje['titulo']) ?>">
                         <?php if ($enlacePdf !== ''): ?><br>Clic en la imagen para ver el PDF completo</a><?php endif; ?>
                     </div>
                     <div class="single-post-content">

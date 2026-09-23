@@ -195,11 +195,6 @@ $guardado = isset($_GET['guardado']);
               <input type="url" name="url_embed" maxlength="500" value="<?= escaparPodcast($formulario['url_embed']) ?>" placeholder="https://open.spotify.com/embed/..." required>
               <small>Usa la URL de inserción proporcionada por Spotify, YouTube u otra plataforma compatible.</small>
             </label>
-            <div class="podcast-fixed-cover">
-              <span>Imagen fija del podcast</span>
-              <img class="podcast-cover-preview" src="../assets/images/podcast.png" alt="Imagen fija de podcast">
-              <small>Todos los episodios utilizarán esta imagen automáticamente.</small>
-            </div>
             <div class="podcast-form-grid">
               <label>Estado
                 <select name="estado">

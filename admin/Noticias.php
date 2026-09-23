@@ -28,6 +28,19 @@ function escaparNoticia(?string $valor): string
 {
     return htmlspecialchars($valor ?? '', ENT_QUOTES, 'UTF-8');
 }
+
+function fechaNoticia(?string $valor): string
+{
+    if (!$valor) {
+        return '';
+    }
+    $fecha = DateTime::createFromFormat('Y-m-d', $valor);
+    if (!$fecha) {
+        return $valor;
+    }
+    $meses = [1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic'];
+    return $meses[(int) $fecha->format('n')] . ' ' . $fecha->format('j, Y');
+}
 ?>
 <!DOCTYPE html>
 <html class="loading" lang="en" data-textdirection="ltr">
@@ -161,7 +174,7 @@ function escaparNoticia(?string $valor): string
                   <div class="noticia-card-body">
                     <span class="noticia-status <?= escaparNoticia($noticia['estado']) ?>"><?= ucfirst(escaparNoticia($noticia['estado'])) ?></span>
                     <h2><?= escaparNoticia($noticia['titulo']) ?></h2>
-                    <p class="noticia-date"><?= date('d/m/Y', strtotime($noticia['fecha_publicacion'])) ?></p>
+                    <p class="noticia-date"><?= escaparNoticia(fechaNoticia($noticia['fecha_publicacion'])) ?></p>
                     <div class="noticia-actions">
                       <a href="config/noticias.php?id=<?= (int) $noticia['id'] ?>">Editar</a>
                       <?php if ($noticia['link_externo']): ?><a href="<?= escaparNoticia($noticia['link_externo']) ?>" target="_blank" rel="noopener">Abrir enlace</a><?php endif; ?><form method="post" onsubmit="return confirm('¿Estás seguro de eliminar esta noticia completa?');"><input type="hidden" name="eliminar_id" value="<?= (int) $noticia['id'] ?>"><button type="submit">Eliminar</button></form>

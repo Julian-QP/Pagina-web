@@ -29,6 +29,19 @@ function escaparVideo(?string $valor): string
     return htmlspecialchars($valor ?? '', ENT_QUOTES, 'UTF-8');
 }
 
+function fechaVideo(?string $valor): string
+{
+    if (!$valor) {
+        return '';
+    }
+    $fecha = DateTime::createFromFormat('Y-m-d', $valor);
+    if (!$fecha) {
+        return $valor;
+    }
+    $meses = [1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic'];
+    return $meses[(int) $fecha->format('n')] . ' ' . $fecha->format('j, Y');
+}
+
 function tituloVideoPreview(?string $titulo, ?string $palabras, ?string $color): string
 {
     $tokens = preg_split('/(\s+)/u', trim((string) $titulo), -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
@@ -210,7 +223,7 @@ function tituloVideoPreview(?string $titulo, ?string $palabras, ?string $color):
                   <div class="video-card-body">
                     <span class="video-status <?= escaparVideo($video['estado']) ?>"><?= ucfirst(escaparVideo($video['estado'])) ?></span>
                     <h2 class="video-card-title-outside"><?= escaparVideo($video['titulo']) ?></h2>
-                    <p class="video-date"><?= date('d/m/Y', strtotime($video['fecha_publicacion'])) ?></p>
+                    <p class="video-date"><?= escaparVideo(fechaVideo($video['fecha_publicacion'])) ?></p>
                     <div class="video-actions">
                       <a href="<?= escaparVideo($video['url_embed']) ?>" target="_blank" rel="noopener noreferrer">Abrir enlace</a><a href="config/video.php?id=<?= (int) $video['id'] ?>">Editar</a><form method="post" onsubmit="return confirm('¿Estás seguro de eliminar este video completo?');"><input type="hidden" name="eliminar_id" value="<?= (int) $video['id'] ?>"><button type="submit">Eliminar</button></form>
                     </div>

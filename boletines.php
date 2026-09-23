@@ -1,7 +1,3 @@
-<!--
-Author: W3layouts
-Author URL: http://w3layouts.com
--->
 <?php
 require_once __DIR__ . '/admin/conexion.php';
 
@@ -29,7 +25,11 @@ function fechaBoletin(?string $valor): string
         return '';
     }
     $fecha = DateTime::createFromFormat('Y-m-d', $valor);
-    return $fecha ? $fecha->format('d/m/Y') : $valor;
+    if (!$fecha) {
+        return $valor;
+    }
+    $meses = [1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic'];
+    return $meses[(int) $fecha->format('n')] . ' ' . $fecha->format('j, Y');
 }
 
 function rutaBoletin(?string $ruta, string $predeterminada = ''): string

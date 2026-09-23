@@ -1,7 +1,3 @@
-<!--
-Author: W3layouts
-Author URL: http://w3layouts.com
--->
 <?php
 require_once __DIR__ . '/admin/conexion.php';
 
@@ -29,7 +25,11 @@ function fechaReportajePublico(?string $valor): string
         return '';
     }
     $fecha = DateTime::createFromFormat('Y-m-d', $valor);
-    return $fecha ? $fecha->format('d/m/Y') : $valor;
+    if (!$fecha) {
+        return $valor;
+    }
+    $meses = [1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic'];
+    return $meses[(int) $fecha->format('n')] . ' ' . $fecha->format('j, Y');
 }
 
 function imagenReportajePublico(?string $ruta): string
@@ -196,7 +196,7 @@ $decoracionAzulPorcentaje = round($decoracionPortada['azul'] / 7, 2);
                 <?php
                 $fotos = $reportaje['fotos'] ? explode('||', $reportaje['fotos']) : [];
                 $imagen = imagenReportajePublico($reportaje['foto_principal'] ?: ($fotos[0] ?? ''));
-                $enlace = '/conte_reportaje.php?id=' . (int) $reportaje['id'];
+                $enlace = 'conte_reportaje.php?id=' . (int) $reportaje['id'];
                 ?>
                 <div class="col-lg-4 col-md-6 grids5-info mt-5 reportajes-secundarios">
                     <a href="<?= $enlace ?>" class="d-block reportaje-public-cover" style="--decoracion-rojo: <?= escaparReportajePublico($decoracionPortada['color_rojo']) ?>; --decoracion-azul: <?= escaparReportajePublico($decoracionPortada['color_azul']) ?>;"><svg viewBox="0 0 700 450" preserveAspectRatio="none" role="img" aria-label="<?= escaparReportajePublico($reportaje['titulo']) ?>"><defs><clipPath id="decoracion-portada-<?= (int) $reportaje['id'] ?>"><path d="<?= escaparReportajePublico($rutaDecoracionSvg) ?>"></path></clipPath></defs><image href="<?= escaparReportajePublico($imagen) ?>" x="0" y="0" width="700" height="450" preserveAspectRatio="xMidYMid slice" clip-path="url(#decoracion-portada-<?= (int) $reportaje['id'] ?>)"></image></svg></a>
