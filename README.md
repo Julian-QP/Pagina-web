@@ -11,3 +11,15 @@ Imagen de la base de datos subida en el host Ininity
 
 Captura de el gestor de archivos de el host Infinity
 <img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/c670771d-98d2-4a9b-b127-7b758a4d48ae" />
+
+Para iniciar sesion con un usaurio
+link https://ddp.lovestoblog.com/admin/
+<img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/8b883b30-abb3-415a-b9c9-d40e236a150a" />
+
+1 usuario para acceder
+
+correo: Admin@gmail.com
+contraseña: 12345
+
+panel principal de administrador
+<img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/2e4eb3b6-f742-4b93-8356-f78877ce48cb" />
